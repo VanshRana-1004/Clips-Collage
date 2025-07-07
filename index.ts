@@ -1,217 +1,48 @@
-import fs from 'fs/promises';
-import path from 'path';
 import { exec } from 'child_process';
-import { promisify } from 'util';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
-const execAsync = promisify(exec);
-
-const INPUT_DIR = path.join(process.cwd(), 'input-clips');
-const OUTPUT_DIR = path.join(process.cwd(), 'output-clips');
-
-async function ensureOutputDir() {
-  await fs.mkdir(OUTPUT_DIR, { recursive: true });
-}
-
-function generateScreenGridLayout(n: number): string {
-  const filterParts: string[] = [];
-
-  const canvasW = 1280, canvasH = 720;
-  const gap = 5;
-
-  const screenW = 960, screenH = 540;
-  let screenX = gap;
-  let screenY = gap;
-
-  let mediaW = 310, mediaH = 175;
-  if (n >= 2) {
-    mediaW = 282;
-    mediaH = 164;
-  }
-
-  filterParts.push(`color=color=white:size=${canvasW}x${canvasH}:duration=10[base]`);
-
-  filterParts.push(
-    `[0:v]scale=${screenW - 4}:${screenH - 4}:force_original_aspect_ratio=decrease,` +
-    `pad=${screenW}:${screenH}:(ow-iw)/2:(oh-ih)/2:color=white[screen]`
-  );
-
-  for (let i = 0; i < n; i++) {
-    const idx = i + 1;
-    filterParts.push(
-      `[${idx}:v]scale=${mediaW - 4}:${mediaH - 4}:force_original_aspect_ratio=decrease,` +
-      `pad=${mediaW}:${mediaH}:(ow-iw)/2:(oh-ih)/2:color=white[m${i}]`
-    );
-  }
-
-  if (n === 2 || n === 3) {
-    screenX = (canvasW - screenW) / 2;
-  } else if (n === 5) {
-    screenX = canvasW - screenW - gap;
-  }
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+const outputFile1 = path.join(__dirname, `layout_preview_1.webm`);
+const outputFile2 = path.join(__dirname, `layout_preview_2.webm`);
+const outputFile3 = path.join(__dirname, `layout_preview_3.webm`);
+const outputFile4 = path.join(__dirname, `layout_preview_4.webm`);
+const outputFile5 = path.join(__dirname, `layout_preview_5.webm`);
+const outputFile6 = path.join(__dirname, `layout_preview_6.webm`);
+const outputFile7 = path.join(__dirname, `layout_preview_7.webm`);
+const outputFile8 = path.join(__dirname, `layout_preview_8.webm`);
+const outputFile9 = path.join(__dirname, `layout_preview_9.webm`);
+const outputFile10 = path.join(__dirname, `layout_preview_10.webm`);
 
 
-  filterParts.push(`[base][screen]overlay=${screenX}:${screenY}[layer0]`);
+// shared screen + media clips
+const screenCmd5 = `ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=904x507:d=5 \ -f lavfi -i color=c=black:s=300x236:d=5 \ -f lavfi -i color=c=black:s=300x236:d=5 \ -f lavfi -i color=c=black:s=300x236:d=5 \ -f lavfi -i color=c=black:s=423x371:d=5 \ -f lavfi -i color=c=black:s=423x371:d=5 \ -filter_complex "[0:v][1:v]overlay=2:2[tmp1];[tmp1][2:v]overlay=2:511[tmp2];[tmp2]overlay=304:511[tmp3];[tmp3]overlay=606:511[tmp4];[tmp4]overlay=908:375[tmp5];[tmp5]overlay=908:2" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile1}"`;
+const screenCmd4 = `ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=904x507:d=5 \ -f lavfi -i color=c=black:s=300x236:d=5 \ -f lavfi -i color=c=black:s=300x236:d=5 \ -f lavfi -i color=c=black:s=423x371:d=5 \ -f lavfi -i color=c=black:s=423x371:d=5 \ -filter_complex "[0:v][1:v]overlay=2:2[tmp1];[tmp1][2:v]overlay=103:511[tmp2];[tmp2]overlay=506:511[tmp3];[tmp3]overlay=908:375[tmp4];[tmp4]overlay=908:2" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile2}"`;
+const screenCmd3 = `ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=904x507:d=5 \ -f lavfi -i color=c=black:s=380x247:d=5 \ -f lavfi -i color=c=black:s=380x247:d=5 \ -f lavfi -i color=c=black:s=380x247:d=5 \ -filter_complex "[0:v][1:v]overlay=16:121[tmp1];[tmp1][2:v]overlay=936:2[tmp2];[tmp2]overlay=936:251[tmp3];[tmp3]overlay=936:500" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile3}"`;
+const screenCmd2 = `ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=904x507:d=5 \ -f lavfi -i color=c=black:s=423x371:d=5 \ -f lavfi -i color=c=black:s=423x371:d=5 \ -filter_complex "[0:v][1:v]overlay=2:121[tmp1];[tmp1]overlay=908:375[tmp2];[tmp2]overlay=908:2" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile4}"`;
+const screenCmd1 = `ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=950x534:d=5 \ -f lavfi -i color=c=black:s=377x270:d=5 \ -filter_complex "[0:v][1:v]overlay=2:2[tmp1];[tmp1]overlay=954:477" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile5}"`;
+const single = `ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=1329x745:d=5 \ -filter_complex "[0:v][1:v]overlay=2:2" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile6}"`;
 
-  let currentLayer = 'layer0';
-  let layerCount = 1;
+// only media clips
+const mediaCmd5=`ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=441x371:d=5 \ -f lavfi -i color=c=black:s=441x371:d=5 \ -f lavfi -i color=c=black:s=441x371:d=5 \ -f lavfi -i color=c=black:s=441x371:d=5 \ -f lavfi -i color=c=black:s=441x371:d=5 \ -filter_complex "[0:v][1:v]overlay=3:2[tmp1];[tmp1][2:v]overlay=446:2[tmp2];[tmp2]overlay=890:2[tmp3];[tmp3]overlay=223:375[tmp4];[tmp4]overlay=667:375" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile7}"`;
+const mediaCmd4=`ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=500x350:d=5 \ -f lavfi -i color=c=black:s=500x350:d=5 \ -f lavfi -i color=c=black:s=500x350:d=5 \ -f lavfi -i color=c=black:s=500x350:d=5 \ -filter_complex "[0:v][1:v]overlay=158:16[tmp1];[tmp1][2:v]overlay=674:16[tmp2];[tmp2]overlay=158:382[tmp3];[tmp3]overlay=674:382" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile8}"`;
+const mediaCmd3=`ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=500x350:d=5 \ -f lavfi -i color=c=black:s=500x350:d=5 \ -f lavfi -i color=c=black:s=500x350:d=5 \ -filter_complex "[0:v][1:v]overlay=158:16[tmp1];[tmp1][2:v]overlay=674:16[tmp2];[tmp2]overlay=416:382" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile9}"`;
+const mediaCmd2=`ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -f lavfi -i color=c=black:s=620x480:d=5 \ -f lavfi -i color=c=black:s=620x480:d=5 \ -filter_complex "[0:v][1:v]overlay=31:134[tmp1];[tmp1][2:v]overlay=682:134" -t 5 -c:v libvpx -pix_fmt yuv420p "${outputFile10}"`;
 
-  const overlay = (input: string, x: number, y: number, isLast = false) => {
-    const output = `layer${layerCount}`;
-    const extra = isLast ? ':shortest=1' : '';
-    filterParts.push(`[${currentLayer}][${input}]overlay=${x}:${y}${extra}[${output}]`);
-    currentLayer = output;
-    layerCount++;
-  };
 
-  if (n === 1) {
-    overlay(`m0`, canvasW - mediaW - gap, canvasH - mediaH - gap, true);
-  }
+const cmdArr=[screenCmd5,screenCmd4,screenCmd3,screenCmd2,screenCmd1,mediaCmd5,mediaCmd4,mediaCmd3,mediaCmd2,single];
+const outputFileArr=[outputFile1,outputFile2,outputFile3,outputFile4,outputFile5,outputFile6,outputFile7,outputFile8,outputFile9,outputFile10]
 
-  if (n === 2) {
-    overlay(`m0`, gap, canvasH - mediaH - gap);
-    overlay(`m1`, canvasW - mediaW - gap, canvasH - mediaH - gap, true);
-  }
+async function createLayouts(cmd,ind : number){
+  exec(cmd, (error, stdout, stderr) => {
+      if (error) {
+        console.error('Error generating layout preview:', error.message);
+        console.error(stderr);
+        return;
+      }
+      console.log('Layout preview created:', outputFileArr[ind]);
+    });
+} 
 
-  if (n === 3) {
-    overlay(`m0`, gap, canvasH - mediaH - gap);
-    overlay(`m1`, canvasW - mediaW - gap, canvasH - mediaH - gap);
-    overlay(`m2`, (canvasW - mediaW) / 2, canvasH - mediaH - gap, true);
-  }
-
-  if (n === 4) {
-    overlay(`m0`, canvasW - mediaW - gap, gap);
-    overlay(`m1`, canvasW - mediaW - gap, mediaH + 2 * gap);
-    overlay(`m2`, gap, canvasH - mediaH - gap);
-    overlay(`m3`, gap + mediaW + gap, canvasH - mediaH - gap, true);
-  }
-
-  if (n === 5) {
-    overlay(`m0`, canvasW - mediaW - gap, gap);
-    overlay(`m1`, canvasW - mediaW - gap, mediaH + 2 * gap);
-    const totalBottomW = mediaW * 3 + gap * 2;
-    const startX = (canvasW - totalBottomW) / 2;
-    overlay(`m2`, startX, canvasH - mediaH - gap);
-    overlay(`m3`, startX + mediaW + gap, canvasH - mediaH - gap);
-    overlay(`m4`, startX + (mediaW + gap) * 2, canvasH - mediaH - gap, true);
-  }
-
-  filterParts.push(`[${currentLayer}]copy[outv]`);
-  return filterParts.join('; ');
-}
-
-function generateGridLayout(n: number) {
-  const layouts = {
-    1: `[0:v]scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2:color=white[outv]`,
-    2: `
-      [0:v]scale=640:720:force_original_aspect_ratio=decrease,pad=640:720:(ow-iw)/2:(oh-ih)/2:color=white[v0];
-      [1:v]scale=640:720:force_original_aspect_ratio=decrease,pad=640:720:(ow-iw)/2:(oh-ih)/2:color=white[v1];
-      [v0][v1]hstack=inputs=2[outv]
-    `,
-    3: `
-      [0:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v0];
-      [1:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v1];
-      [2:v]scale=1280:360:force_original_aspect_ratio=decrease,pad=1280:360:(ow-iw)/2:(oh-ih)/2:color=white[v2];
-      [v0][v1]hstack=inputs=2[top];
-      [top][v2]vstack=inputs=2[outv]
-    `,
-    4: `
-      [0:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v0];
-      [1:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v1];
-      [2:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v2];
-      [3:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v3];
-      [v0][v1]hstack=inputs=2[top];
-      [v2][v3]hstack=inputs=2[bottom];
-      [top][bottom]vstack=inputs=2[outv]
-    `,
-    5: `
-      [0:v]scale=426:360:force_original_aspect_ratio=decrease,pad=426:360:(ow-iw)/2:(oh-ih)/2:color=white[v0];
-      [1:v]scale=426:360:force_original_aspect_ratio=decrease,pad=426:360:(ow-iw)/2:(oh-ih)/2:color=white[v1];
-      [2:v]scale=426:360:force_original_aspect_ratio=decrease,pad=426:360:(ow-iw)/2:(oh-ih)/2:color=white[v2];
-      [3:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v3];
-      [4:v]scale=640:360:force_original_aspect_ratio=decrease,pad=640:360:(ow-iw)/2:(oh-ih)/2:color=white[v4];
-      [v0][v1][v2]hstack=inputs=3[topraw];
-      [topraw]pad=1280:360:(ow-iw)/2:0:color=white[top];
-      [v3][v4]hstack=inputs=2[bottomraw];
-      [bottomraw]pad=1280:360:(ow-iw)/2:0:color=white[bottom];
-      [top][bottom]vstack=inputs=2[outv]
-    `
-  };
-
-  return layouts[n] ? layouts[n].replace(/\s+/g, ' ') : '';
-}
-
-function generateAudioMix(files: string[], audioInputs: number[]) {
-  if (audioInputs.length === 0) return '';
-
-  const inputLabels = audioInputs.map(i => `[${i}:a]`).join('');
-  return `${inputLabels}amix=inputs=${audioInputs.length}:duration=shortest:dropout_transition=2[outa]`;
-}
-
-async function hasAnyAudio(files: string[]) {
-  for (const file of files) {
-    const cmd = `ffprobe -i "${path.join(INPUT_DIR, file)}" -show_streams -select_streams a -loglevel error`;
-    try {
-      const { stdout } = await execAsync(cmd);
-      if (stdout.includes('codec_type=audio')) return true;
-    } catch {}
-  }
-  return false;
-}
-
-async function generateCollage(files : string[],ind : number) {
-  await ensureOutputDir();
-
-  if (files.length === 0) throw new Error("No valid input clips found");
-
-  const screenIndex = files.findIndex(f => f.startsWith('s'));
-  const mediaIndexes = files.map((f, i) => (f.startsWith('a') || f.startsWith('b') || f.startsWith('c')) ? i : -1).filter(i => i !== -1);
-
-  let filter = '';
-  if (screenIndex !== -1) {
-    console.log('screen included');
-    filter = generateScreenGridLayout(mediaIndexes.length);
-  } else {
-    filter = generateGridLayout(mediaIndexes.length);
-  }
-
-  const inputArgs = files.map(f => `-i "${path.join(INPUT_DIR, f)}"`).join(' ');
-  const OUTPUT_FILE = path.join(OUTPUT_DIR, `collage_output-${ind}.mp4`);
-
-  const hasAudio = await hasAnyAudio(files);
-
-  const audioIndexes: number[] = [];
-  for (let i = 0; i < files.length; i++) {
-    const cmd = `ffprobe -i "${path.join(INPUT_DIR, files[i])}" -show_streams -select_streams a -loglevel error`;
-    try {
-      const { stdout } = await execAsync(cmd);
-      if (stdout.includes('codec_type=audio')) audioIndexes.push(i);
-    } catch {}
-  }
-  const audioFilter = generateAudioMix(files, audioIndexes);
-
-  const audioMap = hasAudio ? '-map "[outa]"' : '';
-  const audioFilterCmd = audioFilter ? `; ${audioFilter}` : '';
-
-  const command = `ffmpeg ${inputArgs} -filter_complex "${filter}${audioFilterCmd}" -map "[outv]" ${audioMap} -shortest -y "${OUTPUT_FILE}"`;
-
-  console.log('Running FFmpeg command...');
-  console.log(command);
-  const { stdout, stderr } = await execAsync(command);
-  console.log(stdout);
-  console.error(stderr);
-  console.log(`Collage created at: ${OUTPUT_FILE}`);
-}
-
-const files0 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('s') || f.startsWith('a')));
-const files1 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('a') || f.startsWith('b')));
-const files2 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('s') || f.startsWith('a') || f.startsWith('b')));
-const files3 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('a') || f.startsWith('b') || f.startsWith('c')));
-const files4 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('s') || f.startsWith('a') || f.startsWith('b') || f.startsWith('c')));
-const files5 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('a') || f.startsWith('b') || f.startsWith('c') || f.startsWith('d')));
-const files6 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('s') || f.startsWith('a') || f.startsWith('b') || f.startsWith('c') || f.startsWith('d')));
-const files7 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('a') || f.startsWith('b') || f.startsWith('c') || f.startsWith('d') || f.startsWith('e')));
-const files8 = (await fs.readdir(INPUT_DIR)).filter(f => f.endsWith('.mp4') && (f.startsWith('s') || f.startsWith('a') || f.startsWith('b') || f.startsWith('c') || f.startsWith('d') || f.startsWith('e')));
-
-const arr=[files0,files1,files2,files3,files4,files5,files6,files7,files8]
-
-for(let i=0;i<9;i++) await generateCollage(arr[i],i).catch(console.error);
+for(let i=0;i<cmdArr.length;i++) await createLayouts(cmdArr[i],i).catch(console.error);
