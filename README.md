@@ -7,5 +7,5 @@ This repo generates 5-second FFmpeg-based layout previews to visualize how clips
 
 # Commands
 - ```npm init -y```
-- ```npm install @types/child_process```
+- ```npm install --save-dev @types/node```
 - ```node index.ts```
