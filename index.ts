@@ -16,6 +16,7 @@ const screenClips = videoFiles.filter(f => f.includes('screen'));
 const mediaClips = videoFiles.filter(f => !f.includes('screen'));
 console.log(screenClips);
 console.log(mediaClips);
+
 const outputDir=path.join(__dirname,'output-clips');
 
 const outputFile1 = path.join(outputDir, `layout_preview_1.webm`);
@@ -51,5 +52,12 @@ async function createLayouts(cmd){
       }
     });
 } 
-await createLayouts(mediaCmd10)
-// execute one command at a time
+
+async function runCommands(){
+  const cmdArr=[single1,screenCmd2,screenCmd3,screenCmd4,screenCmd4,screenCmd5,screenCmd6,mediaCmd7,mediaCmd8,mediaCmd9,mediaCmd10];
+  for(let i=0;i<10;i++){
+    await createLayouts(cmdArr[i]).catch(console.error);
+  }
+}
+
+runCommands();
