@@ -1,7 +1,9 @@
 import { exec } from 'child_process';
 import path, { dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { promisify } from 'util';
 import fs from 'fs/promises';
+const execAsync = promisify(exec);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -43,21 +45,32 @@ const mediaCmd8=`ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -i "${mediaC
 const mediaCmd9=`ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -i "${mediaClips[0]}" -i "${mediaClips[0]}" -i "${mediaClips[0]}" -i "${mediaClips[0]}" -filter_complex "[1:v]scale=500:350:force_original_aspect_ratio=decrease[sc1];[2:v]scale=500:350:force_original_aspect_ratio=decrease[sc2];[3:v]scale=500:350:force_original_aspect_ratio=decrease[sc3];[4:v]scale=500:350:force_original_aspect_ratio=decrease[sc4];[0:v][sc1]overlay=158:16[tmp1];[tmp1][sc2]overlay=674:16[tmp2];[tmp2][sc3]overlay=158:382[tmp3];[tmp3][sc4]overlay=674:382" -t 31 -c:v libvpx -b:v 5M -crf 10 -quality good -cpu-used 0 -pix_fmt yuv420p "${outputFile9}"`;
 const mediaCmd10=`ffmpeg -y -f lavfi -i color=c=white:s=1333x749:d=5 -i "${mediaClips[0]}" -i "${mediaClips[0]}" -i "${mediaClips[0]}" -i "${mediaClips[0]}" -i "${mediaClips[0]}" -filter_complex "[1:v]scale=441:371:force_original_aspect_ratio=decrease[sc1];[2:v]scale=441:371:force_original_aspect_ratio=decrease[sc2];[3:v]scale=441:371:force_original_aspect_ratio=decrease[sc3];[4:v]scale=441:371:force_original_aspect_ratio=decrease[sc4];[5:v]scale=441:371:force_original_aspect_ratio=decrease[sc5];[0:v][sc1]overlay=3:2[tmp1];[tmp1][sc2]overlay=446:2[tmp2];[tmp2][sc3]overlay=890:2[tmp3];[tmp3][sc4]overlay=223:375[tmp4];[tmp4][sc5]overlay=667:375" -t 31 -c:v libvpx -b:v 5M -crf 10 -quality good -cpu-used 0 -pix_fmt yuv420p "${outputFile10}"`;
 
-async function createLayouts(cmd){
-  exec(cmd, (error, stdout, stderr) => {
-      if (error) {
-        console.error('Error generating layout preview:', error.message);
-        console.error(stderr);
-        return;
-      }
-    });
-} 
+const cmd=[single1,screenCmd2,screenCmd3,screenCmd4,screenCmd4,screenCmd5,screenCmd6,mediaCmd7,mediaCmd8,mediaCmd9,mediaCmd10];
 
-async function runCommands(){
-  const cmdArr=[single1,screenCmd2,screenCmd3,screenCmd4,screenCmd4,screenCmd5,screenCmd6,mediaCmd7,mediaCmd8,mediaCmd9,mediaCmd10];
-  for(let i=0;i<10;i++){
-    await createLayouts(cmdArr[i]).catch(console.error);
+async function asyncPool(poolLimit, commands) {
+  const results: Promise<string | void>[] = [];
+  const executing: Promise<void>[] = [];
+
+  for (const cmd of commands) {
+    const p = execAsync(cmd).then(result => {
+      console.log(`Done: ${cmd.split(' ')[cmd.split(' ').length - 1]}`);
+      return result.stdout || result.stderr;
+    }).catch(err => {
+      console.error(`Error in: ${cmd}`);
+      console.error(err);
+    });
+
+    results.push(p);
+
+    if (poolLimit <= commands.length) {
+      const e = p.then(() => executing.splice(executing.indexOf(e), 1));
+      executing.push(e);
+      if (executing.length >= poolLimit) {
+        await Promise.race(executing);
+      }
+    }
   }
+  return Promise.all(results);
 }
 
-runCommands();
+await asyncPool(2,cmd);
